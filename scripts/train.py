@@ -119,20 +119,28 @@ def make_scheduler(optimizer, warmup_epochs, total_epochs):
 
 
 def save_checkpoint(path, model, optimizer=None, scheduler=None, epoch=None,
-                    best_acc=None, extra=None):
-    """Full training state, so a run can be resumed rather than restarted."""
+                    best_acc=None, extra=None, include_optimizer=False):
+    """
+    Write a checkpoint.
+
+    By default only the weights are stored (small, portable, enough to run the
+    model). Pass include_optimizer=True to also store the AdamW moments and
+    scheduler state, which is what makes a run resumable -- but that triples
+    the file size, so it goes in a separate .state.pt file.
+    """
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
 
     blob = {
-        "state_dict": model.state_dict(),
+        "state_dict": {k: v.detach().cpu() for k, v in model.state_dict().items()},
         "epoch": epoch,
         "best_acc": best_acc,
     }
-    if optimizer is not None:
-        blob["optimizer"] = optimizer.state_dict()
-    if scheduler is not None:
-        blob["scheduler"] = scheduler.state_dict()
+    if include_optimizer:
+        if optimizer is not None:
+            blob["optimizer"] = optimizer.state_dict()
+        if scheduler is not None:
+            blob["scheduler"] = scheduler.state_dict()
     if extra:
         blob.update(extra)
 
@@ -225,6 +233,7 @@ def fit(
         if verbose:
             print(f"resumed from {resume_from} at epoch {start_epoch - 1} (best {best_acc:.3f})")
 
+    state_path = Path(save_path).with_suffix(".state.pt") if save_path is not None else None
     logger = CsvLogger(log_csv) if log_csv else None
     history = {"train_loss": [], "train_acc": [], "val_loss": [], "val_acc": [], "lr": []}
     started, stale = time.time(), 0
@@ -269,8 +278,12 @@ def fit(
             })
 
         if save_path is not None:
-            save_checkpoint(save_path, model, optimizer, sched, epoch, best_acc,
+            save_checkpoint(save_path, model, epoch=epoch, best_acc=best_acc,
                             extra={"classes": class_names, "best_epoch": best_epoch})
+            if state_path is not None:
+                save_checkpoint(state_path, model, optimizer, sched, epoch, best_acc,
+                                extra={"classes": class_names, "best_epoch": best_epoch},
+                                include_optimizer=True)
 
         if sched is not None:
             sched.step()
@@ -284,6 +297,11 @@ def fit(
 
     if best_weights is not None:
         model.load_state_dict(best_weights)
+        # the per-epoch saves hold whichever epoch just ran; make sure the file
+        # left on disk is the weights that actually scored best
+        if save_path is not None:
+            save_checkpoint(save_path, model, epoch=best_epoch, best_acc=best_acc,
+                            extra={"classes": class_names, "best_epoch": best_epoch})
 
     if verbose:
         print(f"\nfinished in {elapsed:.1f}s -- best val acc {best_acc:.3f} at epoch {best_epoch}")

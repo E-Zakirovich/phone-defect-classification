@@ -11,7 +11,7 @@ Examples
     python main.py --arch resnet --device cuda        # ResNet-50 on GPU
     python main.py --labels type --arch alexnet       # 4-class defect type
     python main.py --limit 256 --epochs 2             # fast smoke test
-    python main.py --resume models/resnet.pt          # continue a run
+    python main.py --resume models/resnet.state.pt    # continue a run
     python main.py --data data_256 --arch resnet      # pre-resized cache
 """
 
