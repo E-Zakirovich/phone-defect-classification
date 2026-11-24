@@ -17,7 +17,7 @@ class AlexNet(nn.Module):
             in_channels = 3,
             out_channels = 96,
             kernel_size = 11,
-            stride = 1
+            stride = 1,
             padding = 0
         )
 
@@ -60,3 +60,20 @@ class AlexNet(nn.Module):
         # activation functions for hidden, convolution and output layers
         self.relu = nn.ReLU() # for convolutions and hidden layers
         self.softmax = nn.Softmax() # for output layer
+
+        # making whole neural networks, the size is 9216 -> 4096 -> 4096 -> 7
+        
+        # fully connected layer one (connection between input layer and hidden layer)
+        self.fully_connected_one = nn.Linear(
+            input = 9216, out_features=4096
+        )
+
+        # fully connected layer two (connection between hidden layer and hidden layer)
+        self.fully_connected_two = nn.Linear(
+            input = 4096, out_features=4096
+        )
+
+        # fully connected layer three (connection between hidden layer and output layer)
+        self.fully_connected_three = nn.Linear(
+            input = 4096, out_features=7
+        )
