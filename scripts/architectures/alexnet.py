@@ -71,17 +71,17 @@ class AlexNet(nn.Module):
         
         # fully connected layer one (connection between input layer and hidden layer)
         self.fully_connected_one = nn.Linear(
-            input = 9216, out_features=4096
+            input = 9216, out_features = 4096
         )
 
         # fully connected layer two (connection between hidden layer and hidden layer)
         self.fully_connected_two = nn.Linear(
-            input = 4096, out_features=4096
+            input = 4096, out_features = 4096
         )
 
         # fully connected layer three (connection between hidden layer and output layer)
         self.fully_connected_three = nn.Linear(
-            input = 4096, out_features=7
+            input = 4096, out_features = 3
         )
 
     # forward propagation

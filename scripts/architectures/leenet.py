@@ -21,7 +21,6 @@ class LeeNet(nn.Module):
             padding = 0
         )
 
-
         # second convolutional layer
         self.convolutional_layer_two = nn.Conv2d(
             in_channels = 6,
@@ -59,7 +58,7 @@ class LeeNet(nn.Module):
 
         # fully connected layer two (connection between hidden layer and output layer)
         self.fully_connected_two = nn.Linear(
-            84, 7
+            input = 84, out_features = 3
         )
 
     # forward propagation
