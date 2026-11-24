@@ -50,3 +50,17 @@ class LeeNet(nn.Module):
         self.tanh = nn.Tanh() # for convolution and hidden layers
         self.softmax = nn.Softmax() # for output layer
 
+        # I am going to make nnet, the size of the nnet is 120 -> 84 -> 7
+
+        # fully connected layer one (connection between hidden layer and output layer)
+        self.fully_connected_one = nn.Linear(
+            input = 120, out_features=84
+        )
+
+        # drop half of parameters
+        self.drop = nn.Dropout(0.5)
+
+        # fully connected layer two (connection between hidden layer and output layer)
+        self.fully_connected_two = nn.Linear(
+            84, 7
+        )
