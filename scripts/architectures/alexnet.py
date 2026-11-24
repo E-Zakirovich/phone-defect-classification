@@ -17,7 +17,7 @@ class AlexNet(nn.Module):
             in_channels = 3,
             out_channels = 96,
             kernel_size = 11,
-            stride = 1,
+            stride = 4,
             padding = 0
         )
 
@@ -49,12 +49,18 @@ class AlexNet(nn.Module):
         )
 
         # fifth convolutional layer
-        self.convolutional_layer_four = nn.Conv2d(
+        self.convolutional_layer_five = nn.Conv2d(
             in_channels = 384,
             out_channels = 384,
             kernel_size = 3,
             stride = 1,
             padding = 1
+        )
+
+        # pooling layer
+        self.pooling = nn.MaxPool2d(
+            kernel_size = 3,
+            stride = 2
         )
 
         # activation functions for hidden, convolution and output layers
@@ -77,3 +83,36 @@ class AlexNet(nn.Module):
         self.fully_connected_three = nn.Linear(
             input = 4096, out_features=7
         )
+
+    # forward propagation
+    def forward(self, x):
+
+        # first convolutional layer
+        x = self.pooling(self.relu(self.convolutional_layer_one(x)))
+
+        # second convolutional layer
+        x = self.pooling(self.relu(self.convolutional_layer_two(x)))
+
+        # third convolutional layer
+        x = self.relu(self.convolutional_layer_three(x))
+
+        # fourth convolutional layer
+        x = self.relu(self.convolutional_layer_four(x))
+
+        # fifth convolutional layer
+        x = self.pooling(self.relu(self.convolutional_layer_five(x)))
+
+        # flattening the output of the last convolutional layer
+        x = x.view(x.size(0), -1)
+
+        # connection between input layer and hidden layer
+        x = self.relu(self.fully_connected_one(x))
+
+        # connection between hidden layer and hidden layer
+        x = self.relu(self.fully_connected_two(x))
+
+        # connection between hidden layer and output layer
+        x = self.softmax(self.fully_connected_three(x))
+
+        # returning the result
+        return x
