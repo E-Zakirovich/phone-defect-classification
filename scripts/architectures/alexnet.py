@@ -56,3 +56,7 @@ class AlexNet(nn.Module):
             stride = 1,
             padding = 1
         )
+
+        # activation functions for hidden, convolution and output layers
+        self.relu = nn.ReLU() # for convolutions and hidden layers
+        self.softmax = nn.Softmax() # for output layer
