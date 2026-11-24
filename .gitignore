@@ -182,3 +182,4 @@ weights/
 *.pt
 *.onnx
 *.pth
+.vscode
