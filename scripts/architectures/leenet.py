@@ -46,3 +46,7 @@ class LeeNet(nn.Module):
             stride = 2
         )
 
+        # activation functions
+        self.tanh = nn.Tanh() # for convolution and hidden layers
+        self.softmax = nn.Softmax() # for output layer
+
