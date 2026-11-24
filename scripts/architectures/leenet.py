@@ -57,10 +57,31 @@ class LeeNet(nn.Module):
             input = 120, out_features=84
         )
 
-        # drop half of parameters
-        self.drop = nn.Dropout(0.5)
-
         # fully connected layer two (connection between hidden layer and output layer)
         self.fully_connected_two = nn.Linear(
             84, 7
         )
+
+    # forward propagation
+    def forward(self, x):
+
+        # first convolutional layer
+        x = self.pooling(self.tanh(self.convolutional_layer_one(x)))
+
+        # second convolutional layer
+        x = self.pooling(self.tanh(self.convolutional_layer_two(x)))
+
+        # third convolutional layer
+        x = self.pooling(self.tanh(self.convolutional_layer_three(x)))
+
+        # falattening last layer for neural networks
+        x = x.view(x.size(0), -1)
+
+        # connection between input layer and hidden layer
+        x = self.tanh(self.fully_connected_one(x))
+
+        # connection between hidden layer and output layer
+        x = self.softmax(self.fully_connected_two(x))
+
+        # return the result
+        return x
