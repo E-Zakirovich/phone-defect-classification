@@ -2,7 +2,7 @@
 alexnet.py
 ~~~~~~~~~
 
-In this file, I am going to built leenet with a help of python 3.14, 
+In this file, I am going to built alexnet with a help of python 3.14, 
 OOP and PyTorch. 
 """
 
