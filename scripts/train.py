@@ -132,7 +132,8 @@ def save_checkpoint(path, model, optimizer=None, scheduler=None, epoch=None,
     path.parent.mkdir(parents=True, exist_ok=True)
 
     blob = {
-        "state_dict": {k: v.detach().cpu() for k, v in model.state_dict().items()},
+        "state_dict": {k.replace("_orig_mod.", ""): v.detach().cpu()
+                       for k, v in model.state_dict().items()},
         "epoch": epoch,
         "best_acc": best_acc,
     }
@@ -230,6 +231,8 @@ def fit(
         start_epoch = (meta["epoch"] or 0) + 1
         best_acc = meta["best_acc"] or -1.0
         best_epoch = meta.get("best_epoch") or 0
+        # the checkpoint holds the best weights so far; treat them as the fallback
+        best_weights = copy.deepcopy(model.state_dict())
         if verbose:
             print(f"resumed from {resume_from} at epoch {start_epoch - 1} (best {best_acc:.3f})")
 
@@ -237,6 +240,9 @@ def fit(
     logger = CsvLogger(log_csv) if log_csv else None
     history = {"train_loss": [], "train_acc": [], "val_loss": [], "val_acc": [], "lr": []}
     started, stale = time.time(), 0
+
+    if verbose:
+        print("loss = error (lower is better)   acc = accuracy (higher is better)")
 
     for epoch in range(start_epoch, epochs + 1):
         t0 = time.time()
@@ -263,8 +269,8 @@ def fit(
         if verbose:
             print(
                 f"epoch {epoch:3d}/{epochs}  "
-                f"train {train_loss:.4f}/{train_acc:.3f}  "
-                f"val {val_loss:.4f}/{val_acc:.3f}  "
+                f"train loss {train_loss:.4f} acc {train_acc:.3f}  |  "
+                f"val loss {val_loss:.4f} acc {val_acc:.3f}  |  "
                 f"lr {current_lr:.2e}  ({time.time() - t0:.1f}s)"
                 + ("  *" if improved else "")
             )

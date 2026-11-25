@@ -24,6 +24,7 @@ import torch
 from scripts import configs
 from scripts.architectures.alexnet import AlexNet
 from scripts.architectures.leenet import LeeNet
+from scripts.architectures.googlenet import GoogLeNet
 from scripts.architectures.resnet import ResNet50
 from scripts.data import DatasetError, build_dataloaders
 from scripts.train import evaluate_and_report, fit
@@ -32,6 +33,7 @@ MODELS = {
     "lenet": LeeNet,
     "alexnet": AlexNet,
     "resnet": ResNet50,
+    "googlenet": GoogLeNet,
 }
 
 
@@ -50,6 +52,8 @@ def parse_args(argv=None):
     parser.add_argument("--validate", action="store_true",
                         help="scan images at startup and skip unreadable ones")
     parser.add_argument("--workers", type=int, default=configs.NUM_WORKERS)
+    parser.add_argument("--val-fraction", type=float, default=configs.VAL_FRACTION,
+                        help="val split when the dataset has no train/val folders")
 
     # model
     parser.add_argument("--arch", default="lenet", choices=sorted(MODELS))
@@ -113,11 +117,12 @@ def main(argv=None):
             seed=args.seed,
             device=device,
             label_mode=args.labels,
+            val_fraction=args.val_fraction,
             limit=args.limit,
             validate=args.validate,
             with_test=args.test,
         )
-    except DatasetError as exc:
+    except (DatasetError, ValueError) as exc:
         print(f"\ncannot build the dataset:\n  {exc}", file=sys.stderr)
         return 1
 
@@ -134,8 +139,13 @@ def main(argv=None):
     print()
 
     # ---- train -----------------------------------------------------------
-    save_path = Path(args.out) / (args.save or f"{args.arch}.pt")
-    log_path = None if args.no_log else Path(args.log or configs.LOGS_DIR / f"{args.arch}.csv")
+    # a --limit run is a smoke test: never let it overwrite the real model
+    smoke = args.limit is not None and args.save is None
+    suffix = "_smoke" if smoke else ""
+    save_path = Path(args.out) / (args.save or f"{args.arch}{suffix}.pt")
+    log_path = None if args.no_log else Path(args.log or configs.LOGS_DIR / f"{args.arch}{suffix}.csv")
+    if smoke:
+        print(f"smoke run    : writing to {save_path.name} (real weights untouched)")
 
     result = fit(
         model,

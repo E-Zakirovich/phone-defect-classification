@@ -37,7 +37,11 @@ import random
 import torch
 from torch.utils.data import DataLoader, Dataset, Subset
 from torchvision import datasets, transforms
-from PIL import Image
+from PIL import Image, ImageFile
+
+# some images in the wild are truncated; PIL can still decode the part that
+# is there, and without this a single bad file aborts the whole epoch
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 MEAN = (0.485, 0.456, 0.406)
 STD = (0.229, 0.224, 0.225)

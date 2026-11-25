@@ -32,6 +32,7 @@ ARCHITECTURES = {
     "lenet":   ArchSpec("lenet",   32,  1e-3, 64),
     "alexnet": ArchSpec("alexnet", 224, 1e-4, 32),
     "resnet":  ArchSpec("resnet",  224, 3e-4, 32),
+    "googlenet": ArchSpec("googlenet", 224, 5e-4, 32),
 }
 
 # ---- training defaults ---------------------------------------------------
