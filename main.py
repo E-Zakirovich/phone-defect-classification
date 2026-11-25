@@ -24,6 +24,7 @@ import torch
 from scripts import configs
 from scripts.architectures.alexnet import AlexNet
 from scripts.architectures.leenet import LeeNet
+from scripts.architectures.convnext import ConvNeXtTiny
 from scripts.architectures.googlenet import GoogLeNet
 from scripts.architectures.resnet import ResNet50
 from scripts.data import DatasetError, build_dataloaders
@@ -34,6 +35,7 @@ MODELS = {
     "alexnet": AlexNet,
     "resnet": ResNet50,
     "googlenet": GoogLeNet,
+    "convnext": ConvNeXtTiny,
 }
 
 

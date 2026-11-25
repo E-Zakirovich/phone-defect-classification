@@ -183,3 +183,5 @@ weights/
 *.onnx
 *.pth
 .vscode
+# pretrained weight cache (ConvNeXt)
+.torchcache/
